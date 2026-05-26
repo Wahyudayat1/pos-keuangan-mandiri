@@ -1,1271 +1,1073 @@
 import React, { useState, useEffect } from 'react'
-import {
-  PiggyBank,
-  Plus,
-  Minus,
-  Trash2,
-  Edit2,
-  RotateCcw,
-  AlertTriangle,
-  ArrowUpRight,
-  ArrowDownLeft,
-  GraduationCap,
-  Home,
-  Car,
-  Utensils,
-  DollarSign,
-  Wallet,
-  Percent,
-  Calendar,
-  Sparkles,
-  Check,
-  X,
-  PlusCircle,
-  HelpCircle,
-  TrendingUp,
-  Info
-} from 'lucide-react'
 
-// Map of standard category icons
-const ICON_MAP = {
-  home: Home,
-  education: GraduationCap,
-  transport: Car,
-  food: Utensils,
-  savings: PiggyBank,
-  other: DollarSign
-}
+// --- ZERO-DEPENDENCY INLINE SVG ICONS (Anti-Crash, Safe & Standard) ---
+const IconWallet = ({ className = "h-5 w-5" }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="14" x="2" y="5" rx="2" />
+    <line x1="2" x2="22" y1="10" y2="10" />
+    <path d="M16 14h2" />
+  </svg>
+)
 
-// Color schemes configurations for buckets
+const IconPiggy = ({ className = "h-5 w-5" }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 5c-1.5 0-2.8 1.4-3 2-2.5-1.7-5.5-1.7-8 0C7.8 6.4 6.5 5 5 5c-2.8 0-5 2.2-5 5 0 3.2 2.2 7.2 5 9h14c2.8-1.8 5-5.8 5-9 0-2.8-2.2-5-5-5Z" />
+    <path d="M12 14v4" />
+    <path d="M10 18h4" />
+    <circle cx="7" cy="11" r="1" />
+  </svg>
+)
+
+const IconPlus = ({ className = "h-4 w-4" }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14M12 5v14" />
+  </svg>
+)
+
+const IconSparkles = ({ className = "h-5 w-5" }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+  </svg>
+)
+
+const IconAlert = ({ className = "h-5 w-5" }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+    <line x1="12" x2="12" y1="9" y2="13" />
+    <line x1="12" x2="12.01" y1="17" y2="17" />
+  </svg>
+)
+
+const IconTrash = ({ className = "h-4 w-4" }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    <line x1="10" x2="10" y1="11" y2="17" />
+    <line x1="14" x2="14" y1="11" y2="17" />
+  </svg>
+)
+
+const IconX = ({ className = "h-4 w-4" }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" x2="6" y1="6" y2="18" />
+    <line x1="6" x2="18" y1="6" y2="18" />
+  </svg>
+)
+
+// --- Color Scheme Map for Dynamic Cards ---
 const COLOR_SCHEMES = {
-  indigo: {
-    border: 'border-indigo-500/30 hover:border-indigo-500/60',
-    bg: 'bg-indigo-500/10',
-    text: 'text-indigo-400',
-    fill: 'bg-indigo-500',
-    glow: 'shadow-indigo-500/20',
-    accent: 'bg-indigo-500/20',
-    badge: 'bg-indigo-950 text-indigo-300 border-indigo-500/30'
-  },
-  violet: {
-    border: 'border-violet-500/30 hover:border-violet-500/60',
-    bg: 'bg-violet-500/10',
-    text: 'text-violet-400',
-    fill: 'bg-violet-500',
-    glow: 'shadow-violet-500/20',
-    accent: 'bg-violet-500/20',
-    badge: 'bg-violet-950 text-violet-300 border-violet-500/30'
-  },
-  emerald: {
-    border: 'border-emerald-500/30 hover:border-emerald-500/60',
-    bg: 'bg-emerald-500/10',
-    text: 'text-emerald-400',
-    fill: 'bg-emerald-500',
-    glow: 'shadow-emerald-500/20',
-    accent: 'bg-emerald-500/20',
-    badge: 'bg-emerald-950 text-emerald-300 border-emerald-500/30'
+  rose: {
+    bg: 'bg-rose-500/10',
+    border: 'border-rose-500/20 border',
+    text: 'text-rose-400',
+    hoverBorder: 'hover:border-rose-500/40',
+    btnBg: 'bg-rose-600 hover:bg-rose-500 text-white',
+    focusBorder: 'focus:border-rose-500',
+    badge: 'bg-rose-950/40 text-rose-450 border-rose-900/40',
+    bar: 'bg-rose-500'
   },
   amber: {
-    border: 'border-amber-500/30 hover:border-amber-500/60',
     bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20 border',
     text: 'text-amber-400',
-    fill: 'bg-amber-500',
-    glow: 'shadow-amber-500/20',
-    accent: 'bg-amber-500/20',
-    badge: 'bg-amber-950 text-amber-300 border-amber-500/30'
+    hoverBorder: 'hover:border-amber-500/40',
+    btnBg: 'bg-amber-600 hover:bg-amber-500 text-white',
+    focusBorder: 'focus:border-amber-500',
+    badge: 'bg-amber-950/40 text-amber-450 border-amber-900/40',
+    bar: 'bg-amber-500'
   },
-  rose: {
-    border: 'border-rose-500/30 hover:border-rose-500/60',
-    bg: 'bg-rose-500/10',
-    text: 'text-rose-400',
-    fill: 'bg-rose-500',
-    glow: 'shadow-rose-500/20',
-    accent: 'bg-rose-500/20',
-    badge: 'bg-rose-950 text-rose-300 border-rose-500/30'
+  emerald: {
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20 border',
+    text: 'text-emerald-400',
+    hoverBorder: 'hover:border-emerald-500/40',
+    btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white',
+    focusBorder: 'focus:border-emerald-500',
+    badge: 'bg-emerald-950/40 text-emerald-450 border-emerald-900/40',
+    bar: 'bg-emerald-500'
+  },
+  sky: {
+    bg: 'bg-sky-500/10',
+    border: 'border-sky-500/20 border',
+    text: 'text-sky-400',
+    hoverBorder: 'hover:border-sky-500/40',
+    btnBg: 'bg-sky-600 hover:bg-sky-500 text-white',
+    focusBorder: 'focus:border-sky-500',
+    badge: 'bg-sky-950/40 text-sky-450 border-sky-900/40',
+    bar: 'bg-sky-500'
+  },
+  violet: {
+    bg: 'bg-violet-500/10',
+    border: 'border-violet-500/20 border',
+    text: 'text-violet-400',
+    hoverBorder: 'hover:border-violet-500/40',
+    btnBg: 'bg-violet-600 hover:bg-violet-500 text-white',
+    focusBorder: 'focus:border-violet-500',
+    badge: 'bg-violet-950/40 text-violet-450 border-violet-900/40',
+    bar: 'bg-violet-500'
+  },
+  fuchsia: {
+    bg: 'bg-fuchsia-500/10',
+    border: 'border-fuchsia-500/20 border',
+    text: 'text-fuchsia-400',
+    hoverBorder: 'hover:border-fuchsia-500/40',
+    btnBg: 'bg-fuchsia-600 hover:bg-fuchsia-500 text-white',
+    focusBorder: 'focus:border-fuchsia-500',
+    badge: 'bg-fuchsia-950/40 text-fuchsia-450 border-fuchsia-900/40',
+    bar: 'bg-fuchsia-500'
   }
 }
 
-// Initial Mockup Data
-const INITIAL_SALARY = 6500000
+// --- Helper: Format Angka Ribuan dengan Titik (Auto-Format Rupiah saat mengetik) ---
+const formatRibuanString = (strVal) => {
+  if (!strVal) return ''
+  const cleaned = strVal.toString().replace(/\D/g, '')
+  if (!cleaned) return ''
+  const numVal = parseInt(cleaned, 10)
+  return numVal.toLocaleString('id-ID')
+}
 
-const INITIAL_BUCKETS = [
-  { id: 'b1', name: 'Bayar Kosan', target: 1500000, saved: 1200000, icon: 'home', color: 'indigo' },
-  { id: 'b2', name: 'Bayar Kuliah', target: 3000000, saved: 1800000, icon: 'education', color: 'violet' },
-  { id: 'b3', name: 'Bensin & Transport', target: 600000, saved: 400000, icon: 'transport', color: 'emerald' },
-  { id: 'b4', name: 'Makan Bulanan', target: 1200000, saved: 600000, icon: 'food', color: 'amber' }
+// Helper: Ubah String Berformat ke Angka Murni
+const parseFormattedToNumber = (strVal) => {
+  if (!strVal) return 0
+  const cleaned = strVal.toString().replace(/\D/g, '')
+  return parseInt(cleaned, 10) || 0
+}
+
+// Helper: Format Tampilan Rupiah Lengkap
+const formatRupiah = (val) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(val || 0)
+}
+
+// --- 5 Pos Bawaan (Default Pos List) beserta Transaksi Dummy Realistik ---
+const DEFAULT_POS_LIST = [
+  {
+    id: 'pos-makan',
+    name: 'Makan & Minum',
+    emoji: '🍚',
+    color: 'rose',
+    totalSpent: 350000,
+    history: [
+      { id: 'mk-1', amount: 150000, note: 'Belanja Sembako & Beras Bulanan', timestamp: '25 Mei, 11:20' },
+      { id: 'mk-2', amount: 200000, note: 'Makan Warteg Mingguan', timestamp: '23 Mei, 18:45' }
+    ]
+  },
+  {
+    id: 'pos-belanja',
+    name: 'Belanja Pribadi',
+    emoji: '🛍️',
+    color: 'amber',
+    totalSpent: 150000,
+    history: [
+      { id: 'bl-1', amount: 150000, note: 'Checkout Kaos Katun Polos', timestamp: '24 Mei, 16:30' }
+    ]
+  },
+  {
+    id: 'pos-keluarga',
+    name: 'Keluarga & Orang Tua',
+    emoji: '🏠',
+    color: 'emerald',
+    totalSpent: 200000,
+    history: [
+      { id: 'kl-1', amount: 200000, note: 'Kirim bulanan untuk Mama', timestamp: '25 Mei, 10:00' }
+    ]
+  },
+  {
+    id: 'pos-kendaraan',
+    name: 'Kendaraan & Transport',
+    emoji: '🛵',
+    color: 'sky',
+    totalSpent: 80000,
+    history: [
+      { id: 'kd-1', amount: 50000, note: 'Pertalite motor seminggu', timestamp: '23 Mei, 08:15' },
+      { id: 'kd-2', amount: 30000, note: 'Servis busi & ganti oli', timestamp: '22 Mei, 15:40' }
+    ]
+  },
+  {
+    id: 'pos-tagihan',
+    name: 'Tagihan & Cicilan',
+    emoji: '💳',
+    color: 'violet',
+    totalSpent: 120000,
+    history: [
+      { id: 'tg-1', amount: 120000, note: 'Paket Internet Kuota Bulanan', timestamp: '21 Mei, 19:20' }
+    ]
+  }
 ]
 
-const INITIAL_TRANSACTIONS = [
-  {
-    id: 't1',
-    type: 'system',
-    amount: 0,
-    description: 'Inisialisasi sistem pos alokasi keuangan mandiri.',
-    timestamp: '25 Mei 2026, 21:00',
-    bucketName: null
-  },
-  {
-    id: 't2',
-    type: 'deposit',
-    amount: 1200000,
-    description: 'Alokasi awal untuk Pos Bayar Kosan',
-    timestamp: '25 Mei 2026, 21:15',
-    bucketName: 'Bayar Kosan'
-  },
-  {
-    id: 't3',
-    type: 'deposit',
-    amount: 1800000,
-    description: 'Menabung sebagian untuk semester depan Pos Bayar Kuliah',
-    timestamp: '25 Mei 2026, 21:30',
-    bucketName: 'Bayar Kuliah'
-  },
-  {
-    id: 't4',
-    type: 'withdraw',
-    amount: 50000,
-    description: 'Membeli bensin pertalite motor bulanan',
-    timestamp: '25 Mei 2026, 23:10',
-    bucketName: 'Bensin & Transport'
-  }
+const DUMMY_NABUNG = [
+  { id: 'nb-1', amount: 500000, note: 'Beli Reksa Dana Obligasi', timestamp: '26 Mei, 14:00' },
+  { id: 'nb-2', amount: 300000, note: 'Celengan Fisik Emas', timestamp: '24 Mei, 09:30' }
 ]
 
 export default function App() {
-  // State variables with LocalStorage backup
-  const [salary, setSalary] = useState(() => {
-    const saved = localStorage.getItem('pb_salary')
-    return saved ? parseInt(saved, 10) : INITIAL_SALARY
-  })
-
-  const [buckets, setBuckets] = useState(() => {
-    const saved = localStorage.getItem('pb_buckets')
-    return saved ? JSON.parse(saved) : INITIAL_BUCKETS
-  })
-
-  const [transactions, setTransactions] = useState(() => {
-    const saved = localStorage.getItem('pb_transactions')
-    return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS
-  })
-
-  // Salary Editing State
-  const [isEditingSalary, setIsEditingSalary] = useState(false)
-  const [salaryInput, setSalaryInput] = useState(salary)
-
-  // Creation State
-  const [isAddingBucket, setIsAddingBucket] = useState(false)
-  const [newBucketName, setNewBucketName] = useState('')
-  const [newBucketTarget, setNewBucketTarget] = useState('')
-  const [newBucketIcon, setNewBucketIcon] = useState('savings')
-  const [newBucketColor, setNewBucketColor] = useState('indigo')
-
-  // Edit Bucket State
-  const [editingBucketId, setEditingBucketId] = useState(null)
-  const [editName, setEditName] = useState('')
-  const [editTarget, setEditTarget] = useState('')
-  const [editIcon, setEditIcon] = useState('savings')
-  const [editColor, setEditColor] = useState('indigo')
-
-  // Card Transaction State (Deposit/Withdraw values keyed by bucketId)
-  const [cardAmounts, setCardAmounts] = useState({})
-  const [cardActionTypes, setCardActionTypes] = useState({}) // 'deposit' or 'withdraw'
-
-  // Transactions list search and filters
-  const [txSearch, setTxSearch] = useState('')
-  const [txFilter, setTxFilter] = useState('all')
-
-  // Custom alert notifications
-  const [notification, setNotification] = useState(null)
-
-  // Auto Dismiss Notification
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null)
-      }, 5000)
-      return () => clearTimeout(timer)
+  // State 1: Total Pemasukan Utama
+  const [totalPemasukan, setTotalPemasukan] = useState(() => {
+    try {
+      const saved = localStorage.getItem('apk_pemasukan')
+      return saved !== null ? parseInt(saved, 10) : 2500000
+    } catch (e) {
+      return 2500000
     }
-  }, [notification])
+  })
 
-  // Save to LocalStorage whenever state changes
+  // State 2: Uang Nabung
+  const [totalNabung, setTotalNabung] = useState(() => {
+    try {
+      const saved = localStorage.getItem('apk_nabung_total')
+      return saved !== null ? parseInt(saved, 10) : 800000
+    } catch (e) {
+      return 800000
+    }
+  })
+
+  // State 3: Riwayat Tabungan
+  const [nabungHistory, setNabungHistory] = useState(() => {
+    try {
+      const saved = localStorage.getItem('apk_nabung_history')
+      return saved !== null ? JSON.parse(saved) : DUMMY_NABUNG
+    } catch (e) {
+      return []
+    }
+  })
+
+  // State 4: DAFTAR POS PENGELUARAN (Dinamis / Multiple Pos)
+  const [posList, setPosList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('apk_pos_list')
+      return saved !== null ? JSON.parse(saved) : DEFAULT_POS_LIST
+    } catch (e) {
+      return DEFAULT_POS_LIST
+    }
+  })
+
+  // --- State Form input utama ---
+  const [inputPemasukan, setInputPemasukan] = useState('')
+  const [inputNabungAmount, setInputNabungAmount] = useState('')
+  const [inputNabungNote, setInputNabungNote] = useState('')
+
+  // State form penambahan pos kustom baru
+  const [newPosName, setNewPosName] = useState('')
+  const [newPosEmoji, setNewPosEmoji] = useState('🍿')
+  const [newPosColor, setNewPosColor] = useState('rose')
+  const [showCustomPosForm, setShowCustomPosForm] = useState(false)
+
+  // State Notification Toast
+  const [toast, setToast] = useState(null)
+
+  // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem('pb_salary', salary)
-  }, [salary])
+    try {
+      localStorage.setItem('apk_pemasukan', totalPemasukan.toString())
+      localStorage.setItem('apk_nabung_total', totalNabung.toString())
+      localStorage.setItem('apk_nabung_history', JSON.stringify(nabungHistory))
+      localStorage.setItem('apk_pos_list', JSON.stringify(posList))
+    } catch (e) {}
+  }, [totalPemasukan, totalNabung, nabungHistory, posList])
 
-  useEffect(() => {
-    localStorage.setItem('pb_buckets', JSON.stringify(buckets))
-  }, [buckets])
-
-  useEffect(() => {
-    localStorage.setItem('pb_transactions', JSON.stringify(transactions))
-  }, [transactions])
-
-  // Derived Values
-  const totalAllocated = buckets.reduce((acc, curr) => acc + curr.saved, 0)
-  const totalTarget = buckets.reduce((acc, curr) => acc + curr.target, 0)
-  const unallocatedBalance = salary - totalAllocated
-  const overallSavedPercent = totalTarget > 0 ? Math.min(Math.round((totalAllocated / totalTarget) * 100), 100) : 0
-
-  // Format IDR Currency
-  const formatRupiah = (val) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(val)
+  // Trigger Toast Notification Helper
+  const triggerToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000)
   }
 
-  // Get dynamic local timestamp
-  const getTimestamp = () => {
-    const options = { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }
-    return new Date().toLocaleDateString('id-ID', options)
-  }
+  // --- LOGIKA MATEMATIKA SALDO REAL-TIME ---
+  const totalPengeluaranSemuaPos = posList.reduce((acc, curr) => acc + (curr.totalSpent || 0), 0)
+  const sisaSaldoUtama = totalPemasukan - (totalNabung + totalPengeluaranSemuaPos)
 
-  // Add notification
-  const triggerNotification = (text, type = 'success') => {
-    setNotification({ text, type })
-  }
+  // --- ACTIONS ---
 
-  // Handle Salary Update
-  const saveSalary = (e) => {
+  // 1. Tambah Pemasukan Baru
+  const handleAddPemasukan = (e) => {
     e.preventDefault()
-    const parsed = parseInt(salaryInput, 10)
-    if (isNaN(parsed) || parsed < 0) {
-      triggerNotification('Jumlah pendapatan tidak valid!', 'error')
+    const rawVal = parseFormattedToNumber(inputPemasukan)
+
+    if (rawVal <= 0) {
+      triggerToast('Masukkan nominal pemasukan yang valid!', 'error')
       return
     }
-    setSalary(parsed)
-    setIsEditingSalary(false)
 
-    // Add transaction log
-    const newTx = {
-      id: 'tx-' + Date.now(),
-      type: 'system',
-      amount: parsed,
-      description: `Mengubah total pendapatan masuk menjadi ${formatRupiah(parsed)}`,
-      timestamp: getTimestamp(),
-      bucketName: null
-    }
-    setTransactions([newTx, ...transactions])
-    triggerNotification('Pendapatan bulanan berhasil diperbarui.')
+    setTotalPemasukan(prev => prev + rawVal)
+    setInputPemasukan('')
+    triggerToast(`Sukses menambah Pemasukan sebesar +${formatRupiah(rawVal)}`)
   }
 
-  // Create Savings Bucket
-  const createBucket = (e) => {
+  // 2. Setel Uang Pemasukan Kembali ke 0
+  const handleResetPemasukan = () => {
+    if (window.confirm('Reset pemasukan akan menyetel total pemasukan Anda kembali ke Rp 0. Lanjutkan?')) {
+      setTotalPemasukan(0)
+      triggerToast('Total pemasukan diubah menjadi Rp 0', 'error')
+    }
+  }
+
+  // 3. Tambah Alokasi Tabungan
+  const handleAddNabung = (e) => {
     e.preventDefault()
-    if (!newBucketName.trim()) {
-      triggerNotification('Nama pos tidak boleh kosong!', 'error')
-      return
-    }
-    const target = parseInt(newBucketTarget, 10)
-    if (isNaN(target) || target <= 0) {
-      triggerNotification('Target tabungan harus berupa angka positif!', 'error')
+    const amount = parseFormattedToNumber(inputNabungAmount)
+    const noteText = inputNabungNote.trim() || 'Alokasi Tabungan Pintar'
+
+    if (amount <= 0) {
+      triggerToast('Masukkan nominal tabungan yang valid!', 'error')
       return
     }
 
-    const newBucket = {
-      id: 'b-' + Date.now(),
-      name: newBucketName.trim(),
-      target: target,
-      saved: 0,
-      icon: newBucketIcon,
-      color: newBucketColor
+    // VALIDASI MATEMATIKA SALDO: Tidak boleh melebihi Sisa Saldo Utama
+    if (amount > sisaSaldoUtama) {
+      triggerToast(`🚨 Over-Budget! Sisa saldo utama tidak cukup untuk menabung ${formatRupiah(amount)}`, 'error')
+      return
     }
-
-    setBuckets([...buckets, newBucket])
 
     const newTx = {
-      id: 'tx-' + Date.now(),
-      type: 'system',
-      amount: 0,
-      description: `Membuat pos tabungan baru: "${newBucket.name}" dengan target ${formatRupiah(target)}`,
-      timestamp: getTimestamp(),
-      bucketName: newBucket.name
+      id: `nb-${Date.now()}`,
+      amount,
+      note: noteText,
+      timestamp: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
     }
-    setTransactions([newTx, ...transactions])
 
+    setTotalNabung(prev => prev + amount)
+    setNabungHistory(prev => [newTx, ...prev])
+    
     // Reset Form
-    setNewBucketName('')
-    setNewBucketTarget('')
-    setIsAddingBucket(false)
-    triggerNotification(`Pos tabungan "${newBucket.name}" berhasil dibuat!`)
+    setInputNabungAmount('')
+    setInputNabungNote('')
+    triggerToast(`Sukses mengalokasikan ${formatRupiah(amount)} untuk Tabungan!`)
   }
 
-  // Set up Editing for Bucket
-  const startEditingBucket = (bucket) => {
-    setEditingBucketId(bucket.id)
-    setEditName(bucket.name)
-    setEditTarget(bucket.target)
-    setEditIcon(bucket.icon)
-    setEditColor(bucket.color)
-  }
-
-  // Update Savings Bucket details
-  const updateBucket = (e) => {
-    e.preventDefault()
-    if (!editName.trim()) {
-      triggerNotification('Nama pos tidak boleh kosong!', 'error')
-      return
+  // 4. Hapus Alokasi Nabung (Refund ke Sisa Saldo Utama)
+  const handleDeleteNabung = (tx) => {
+    if (window.confirm(`Hapus alokasi tabungan "${tx.note}"?\nSaldo sebesar ${formatRupiah(tx.amount)} akan dikembalikan ke Sisa Saldo Utama.`)) {
+      setTotalNabung(prev => Math.max(0, prev - tx.amount))
+      setNabungHistory(prev => prev.filter(item => item.id !== tx.id))
+      triggerToast('Alokasi tabungan dihapus, saldo dikembalikan.')
     }
-    const target = parseInt(editTarget, 10)
-    if (isNaN(target) || target <= 0) {
-      triggerNotification('Target harus berupa angka positif!', 'error')
+  }
+
+  // 5. Tambah Pengeluaran di Pos Tertentu (Callback dari Sub-Komponen)
+  const handleAddPosTransaction = (posId, amount, noteText) => {
+    if (amount <= 0) {
+      triggerToast('Masukkan nominal pengeluaran yang valid!', 'error')
       return
     }
 
-    setBuckets(buckets.map(b => {
-      if (b.id === editingBucketId) {
-        return { ...b, name: editName.trim(), target: target, icon: editIcon, color: editColor }
+    // VALIDASI MATEMATIKA SALDO UTAMA
+    if (amount > sisaSaldoUtama) {
+      triggerToast(`🚨 Over-Budget! Sisa saldo utama tidak cukup untuk pengeluaran sebesar ${formatRupiah(amount)}`, 'error')
+      return
+    }
+
+    const timestampStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+    const newTx = {
+      id: `tx-${Date.now()}`,
+      amount,
+      note: noteText || 'Pengeluaran Pos',
+      timestamp: timestampStr
+    }
+
+    setPosList(prevList => prevList.map(pos => {
+      if (pos.id === posId) {
+        return {
+          ...pos,
+          totalSpent: (pos.totalSpent || 0) + amount,
+          history: [newTx, ...(pos.history || [])]
+        }
       }
-      return b
+      return pos
     }))
 
-    const newTx = {
-      id: 'tx-' + Date.now(),
-      type: 'system',
-      amount: 0,
-      description: `Memperbarui info pos tabungan: "${editName}"`,
-      timestamp: getTimestamp(),
-      bucketName: editName
-    }
-    setTransactions([newTx, ...transactions])
-    setEditingBucketId(null)
-    triggerNotification('Detail pos tabungan berhasil diperbarui.')
+    const posTarget = posList.find(p => p.id === posId)
+    triggerToast(`Sukses mencatat ${formatRupiah(amount)} pada ${posTarget?.name || 'Pos'}`)
   }
 
-  // Delete Savings Bucket
-  const deleteBucket = (id, name, saved) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus pos "${name}"? Sisa dana di dalamnya (${formatRupiah(saved)}) akan dikembalikan ke saldo yang belum dialokasikan.`)) {
-      setBuckets(buckets.filter(b => b.id !== id))
-
-      const newTx = {
-        id: 'tx-' + Date.now(),
-        type: 'system',
-        amount: saved,
-        description: `Menghapus pos "${name}" dan mengembalikan ${formatRupiah(saved)} ke saldo tidak teralokasi.`,
-        timestamp: getTimestamp(),
-        bucketName: name
-      }
-      setTransactions([newTx, ...transactions])
-      triggerNotification(`Pos tabungan "${name}" berhasil dihapus.`)
+  // 6. Hapus Pengeluaran di Pos Tertentu (Refund ke Sisa Saldo Utama)
+  const handleDeletePosTransaction = (posId, tx) => {
+    if (window.confirm(`Hapus pengeluaran "${tx.note}"?\nDana sebesar ${formatRupiah(tx.amount)} akan dikembalikan ke Sisa Saldo Utama.`)) {
+      setPosList(prevList => prevList.map(pos => {
+        if (pos.id === posId) {
+          return {
+            ...pos,
+            totalSpent: Math.max(0, (pos.totalSpent || 0) - tx.amount),
+            history: (pos.history || []).filter(item => item.id !== tx.id)
+          }
+        }
+        return pos
+      }))
+      triggerToast('Pengeluaran dihapus, dana dikembalikan.')
     }
   }
 
-  // Handle deposit or withdraw inside bucket card
-  const processCardTransaction = (bucketId) => {
-    const bucket = buckets.find(b => b.id === bucketId)
-    if (!bucket) return
+  // 7. Tambah Pos Kustom Baru
+  const handleCreateCustomPos = (e) => {
+    e.preventDefault()
+    const name = newPosName.trim()
 
-    const amount = parseInt(cardAmounts[bucketId], 10)
-    const action = cardActionTypes[bucketId] || 'deposit'
-
-    if (isNaN(amount) || amount <= 0) {
-      triggerNotification('Masukkan nominal uang yang valid!', 'error')
+    if (!name) {
+      triggerToast('Nama pos kebutuhan tidak boleh kosong!', 'error')
       return
     }
 
-    if (action === 'deposit') {
-      // Validate unallocated balance
-      if (amount > unallocatedBalance) {
-        triggerNotification(`Saldo tidak teralokasi tidak mencukupi! Sisa saldo Anda: ${formatRupiah(unallocatedBalance)}`, 'error')
-        return
-      }
-
-      setBuckets(buckets.map(b => {
-        if (b.id === bucketId) {
-          return { ...b, saved: b.saved + amount }
-        }
-        return b
-      }))
-
-      const newTx = {
-        id: 'tx-' + Date.now(),
-        type: 'deposit',
-        amount: amount,
-        description: `Mengalokasikan dana ke Pos "${bucket.name}"`,
-        timestamp: getTimestamp(),
-        bucketName: bucket.name
-      }
-      setTransactions([newTx, ...transactions])
-      triggerNotification(`Sukses mengalokasikan ${formatRupiah(amount)} ke "${bucket.name}".`)
-    } else {
-      // Withdrawal / Spend
-      if (amount > bucket.saved) {
-        triggerNotification(`Dana di pos "${bucket.name}" tidak mencukupi! Dana terisi saat ini: ${formatRupiah(bucket.saved)}`, 'error')
-        return
-      }
-
-      setBuckets(buckets.map(b => {
-        if (b.id === bucketId) {
-          return { ...b, saved: b.saved - amount }
-        }
-        return b
-      }))
-
-      const newTx = {
-        id: 'tx-' + Date.now(),
-        type: 'withdraw',
-        amount: amount,
-        description: `Memakai dana dari Pos "${bucket.name}"`,
-        timestamp: getTimestamp(),
-        bucketName: bucket.name
-      }
-      setTransactions([newTx, ...transactions])
-      triggerNotification(`Sukses mengambil ${formatRupiah(amount)} dari "${bucket.name}".`)
+    // Periksa jika nama pos sudah ada
+    const nameExists = posList.some(pos => pos.name.toLowerCase() === name.toLowerCase())
+    if (nameExists) {
+      triggerToast('Pos kebutuhan dengan nama ini sudah terdaftar!', 'error')
+      return
     }
 
-    // Reset quick amount inputs for this specific card
-    setCardAmounts({ ...cardAmounts, [bucketId]: '' })
+    const newCustomPos = {
+      id: `pos-custom-${Date.now()}`,
+      name,
+      emoji: newPosEmoji,
+      color: newPosColor,
+      totalSpent: 0,
+      history: []
+    }
+
+    setPosList(prev => [...prev, newCustomPos])
+    setNewPosName('')
+    setShowCustomPosForm(false)
+    triggerToast(`Pos Kebutuhan "${name}" berhasil ditambahkan!`)
   }
 
-  // Preset Buttons click helper
-  const setQuickAmount = (bucketId, amount, action) => {
-    setCardAmounts({ ...cardAmounts, [bucketId]: amount })
-    setCardActionTypes({ ...cardActionTypes, [bucketId]: action })
-  }
+  // 8. Hapus Pos Kustom Pilihan Pengguna (Refund seluruh saldonya jika ada)
+  const handleDeleteCustomPos = (posId, name, totalSpent) => {
+    const confirmMessage = totalSpent > 0 
+      ? `Hapus pos "${name}"? Seluruh pengeluaran yang teralokasi (${formatRupiah(totalSpent)}) akan dikembalikan ke Sisa Saldo Utama.`
+      : `Hapus pos kebutuhan "${name}"?`
 
-  // Restore Default App Values
-  const resetToDefault = () => {
-    if (window.confirm('Apakah Anda yakin ingin mengatur ulang semua data dashboard kembali ke awal? Semua perubahan Anda akan hilang.')) {
-      setSalary(INITIAL_SALARY)
-      setSalaryInput(INITIAL_SALARY)
-      setBuckets(INITIAL_BUCKETS)
-      setTransactions(INITIAL_TRANSACTIONS)
-      setCardAmounts({})
-      setCardActionTypes({})
-      setEditingBucketId(null)
-      setIsAddingBucket(false)
-      triggerNotification('Data dashboard berhasil diatur ulang ke default.')
+    if (window.confirm(confirmMessage)) {
+      setPosList(prev => prev.filter(pos => pos.id !== posId))
+      triggerToast(`Pos Kebutuhan "${name}" berhasil dihapus.`)
     }
   }
 
-  // Filtering transactions list
-  const filteredTransactions = transactions.filter(tx => {
-    const matchesSearch = tx.description.toLowerCase().includes(txSearch.toLowerCase()) ||
-      (tx.bucketName && tx.bucketName.toLowerCase().includes(txSearch.toLowerCase()))
+  // 9. Reset Seluruh Aplikasi dari Nol
+  const handleResetSemua = () => {
+    if (window.confirm('🚨 PERINGATAN! Anda yakin ingin menghapus seluruh data dan memulai dari nol kembali?')) {
+      setTotalPemasukan(0)
+      setTotalNabung(0)
+      setNabungHistory([])
+      setPosList(DEFAULT_POS_LIST)
+      triggerToast('Seluruh data berhasil disetel ulang!', 'error')
+    }
+  }
 
-    if (txFilter === 'all') return matchesSearch
-    return tx.type === txFilter && matchesSearch
-  })
+  // --- CALC PERCENTAGES FOR DYNAMIC STACKED CHART ---
+  const pctSisa = totalPemasukan > 0 ? Math.max(0, Math.min(100, (sisaSaldoUtama / totalPemasukan) * 100)) : 0
+  const pctNabung = totalPemasukan > 0 ? Math.max(0, Math.min(100, (totalNabung / totalPemasukan) * 100)) : 0
+  const pctSemuaPos = totalPemasukan > 0 ? Math.max(0, Math.min(100, (totalPengeluaranSemuaPos / totalPemasukan) * 100)) : 0
+
+  // Warning Level Border & Glow Styles
+  let safetyBorder = 'border-slate-800'
+  let safetyGlow = 'glow-emerald'
+  let safetyLabel = 'Keuangan Aman 🍀'
+  let safetyDesc = 'Dana Anda teralokasi dengan proporsional dan sisa saldo masih sangat mencukupi kebutuhan.'
+
+  if (sisaSaldoUtama < 100000 && totalPemasukan > 0) {
+    safetyBorder = 'border-rose-800/80'
+    safetyGlow = 'glow-rose'
+    safetyLabel = 'Kritis / Menipis 🚨'
+    safetyDesc = 'Sisa Saldo Utama Anda hampir habis. Kurangi pengeluaran baru hingga pemasukan berikutnya.'
+  } else if (sisaSaldoUtama < 500000 && totalPemasukan > 0) {
+    safetyBorder = 'border-amber-800/60'
+    safetyGlow = 'glow-indigo'
+    safetyLabel = 'Perlu Hemat ⚠️'
+    safetyDesc = 'Sisa saldo tersisa kurang dari Rp 500.000. Batasi pengeluaran non-primer Anda.'
+  }
+
+  // Emoji options for custom pos form
+  const emojiOptions = ['🍿', '🎮', '🏥', '📚', '🧸', '✈️', '🎁', '💇', '🍕', '🍻']
+  const colorOptions = ['rose', 'amber', 'emerald', 'sky', 'violet', 'fuchsia']
 
   return (
-    <div className="min-h-screen pb-20 px-4 md:px-8 max-w-7xl mx-auto flex flex-col justify-between">
-      {/* Toast Notification */}
-      {notification && (
-        <div className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-4 rounded-xl border backdrop-blur-md shadow-2xl transition-all duration-300 animate-bounce ${notification.type === 'error'
-            ? 'bg-rose-950/90 border-rose-500/50 text-rose-200'
-            : 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
-          }`}>
-          {notification.type === 'error' ? <AlertTriangle className="h-5 w-5 text-rose-400" /> : <Sparkles className="h-5 w-5 text-emerald-400" />}
-          <span className="text-sm font-semibold">{notification.text}</span>
-          <button onClick={() => setNotification(null)} className="ml-2 hover:opacity-75">
-            <X className="h-4 w-4" />
+    <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans antialiased pb-16 pt-6 px-4 selection:bg-emerald-500 selection:text-white">
+      
+      {/* Background glowing rings */}
+      <div className="fixed top-[-10%] left-[-15%] w-[60%] h-[60%] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-10%] right-[-15%] w-[60%] h-[60%] bg-indigo-500/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
+
+      {/* CSS Styles for smoother micro-interactions */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fadeInSlide {
+          from { transform: translateY(16px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-fadein {
+          animation: fadeInSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .glass-card {
+          background: rgba(30, 41, 59, 0.45);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glow-emerald {
+          box-shadow: 0 0 30px -5px rgba(16, 185, 129, 0.18);
+        }
+        .glow-rose {
+          box-shadow: 0 0 30px -5px rgba(244, 63, 94, 0.18);
+        }
+        .glow-indigo {
+          box-shadow: 0 0 30px -5px rgba(245, 158, 11, 0.18);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+      `}} />
+
+      {/* Global Dynamic Notification Toast */}
+      {toast && (
+        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-5 py-3.5 rounded-xl border shadow-2xl backdrop-blur-md transition-all duration-300 ${
+          toast.type === 'error'
+            ? 'bg-rose-950/95 border-rose-800 text-rose-300'
+            : 'bg-emerald-950/95 border-emerald-800 text-emerald-300'
+        }`}>
+          {toast.type === 'error' ? <IconAlert className="h-5 w-5 shrink-0" /> : <IconSparkles className="h-5 w-5 shrink-0" />}
+          <span className="text-xs font-bold tracking-wide">{toast.message}</span>
+          <button onClick={() => setToast(null)} className="ml-1 hover:opacity-75 focus:outline-none">
+            <IconX className="h-4 w-4" />
           </button>
         </div>
       )}
 
-      {/* Main Container */}
-      <div className="w-full">
-        {/* Header Dashboard */}
-        <header className="py-8 flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 gap-4 mb-8">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                Pos Keuangan Mandiri
-              </h1>
+      {/* CENTRALIZED WRAPPER CONTAINER (MOBILE-FIRST VIEWPORT) */}
+      <div className="w-full max-w-md mx-auto relative z-10 animate-fadein">
+        
+        {/* PREMIUM STATUS BAR & HEADER */}
+        <header className="flex justify-between items-center mb-6 px-1">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-indigo-600 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-emerald-500/20">
+              💼
             </div>
-            <p className="text-slate-400 text-xs md:text-sm mt-2 flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-indigo-400" />
-              <span>Dashboard Alokasi Tabungan & Pendapatan &bull; {getTimestamp()}</span>
-            </p>
+            <div>
+              <h1 className="text-sm font-extrabold tracking-tight text-white leading-none">Pos Keuangan Mandiri</h1>
+              <span className="text-[9px] font-black text-slate-450 uppercase tracking-widest block mt-1">Sistem Alokasi Multi-Pos</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3 self-end md:self-center">
+
+          <div className="flex items-center gap-2">
             <button
-              onClick={resetToDefault}
-              className="px-4 py-2 text-xs md:text-sm font-medium text-slate-400 hover:text-white border border-slate-800 hover:bg-slate-900 rounded-xl flex items-center gap-2 transition-all cursor-pointer"
+              onClick={handleResetSemua}
+              className="p-2 rounded-xl bg-slate-800/80 border border-slate-700/50 text-slate-400 hover:text-rose-450 transition-colors"
+              title="Reset Semua Data"
             >
-              <RotateCcw className="h-4 w-4" />
-              <span>Reset Data</span>
+              <IconTrash className="h-4 w-4" />
             </button>
           </div>
         </header>
 
-        {/* Unallocated Warning Alert */}
-        {unallocatedBalance < 0 && (
-          <div className="mb-6 bg-rose-950/40 border border-rose-500/30 text-rose-300 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 glow-rose transition-all duration-300">
-            <div className="p-2 bg-rose-900/50 rounded-xl text-rose-400 shrink-0">
-              <AlertTriangle className="h-6 w-6" />
-            </div>
-            <div>
-              <h4 className="font-bold text-rose-200 text-sm md:text-base">Peringatan: Over-Alokasi Dana!</h4>
-              <p className="text-xs md:text-sm text-rose-300/80">
-                Dana yang sudah dialokasikan ke pos-pos melebihi total pendapatan bulanan Anda sebesar{' '}
-                <strong className="text-rose-200">{formatRupiah(Math.abs(unallocatedBalance))}</strong>. Mohon sesuaikan
-                alokasi dana atau naikkan target pendapatan.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Summary Card Grid */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" aria-label="Ringkasan Finansial">
-          {/* Card 1: Total Gaji */}
-          <div className="glass-panel p-6 rounded-3xl relative overflow-hidden group border border-slate-800/80 hover:border-slate-700/60 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-all"></div>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Pendapatan</span>
-              <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400">
-                <Wallet className="h-5 w-5" />
-              </div>
-            </div>
-            {isEditingSalary ? (
-              <form onSubmit={saveSalary} className="flex items-center gap-2 mt-2">
-                <div className="relative flex-grow">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-semibold">Rp</span>
-                  <input
-                    type="number"
-                    value={salaryInput}
-                    onChange={(e) => setSalaryInput(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-lg font-bold rounded-xl glass-input outline-none"
-                    autoFocus
-                  />
-                </div>
-                <button type="submit" className="p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-500/20 cursor-pointer">
-                  <Check className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditingSalary(false)
-                    setSalaryInput(salary)
-                  }}
-                  className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 cursor-pointer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </form>
-            ) : (
-              <div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{formatRupiah(salary)}</span>
-                  <button
-                    onClick={() => setIsEditingSalary(true)}
-                    className="text-indigo-400 hover:text-indigo-300 p-1.5 hover:bg-indigo-500/10 rounded-lg transition-all cursor-pointer"
-                    title="Ubah Pendapatan"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </button>
-                </div>
-                <p className="text-slate-500 text-xs mt-2">Total gaji bulanan masuk yang siap dialokasikan</p>
-              </div>
-            )}
-          </div>
-
-          {/* Card 2: Dialokasikan */}
-          <div className="glass-panel p-6 rounded-3xl relative overflow-hidden group border border-slate-800/80 hover:border-slate-700/60 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-violet-500/5 rounded-full blur-3xl group-hover:bg-violet-500/10 transition-all"></div>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Sudah Dialokasikan</span>
-              <div className="p-2 bg-violet-500/10 rounded-xl text-violet-400">
-                <PiggyBank className="h-5 w-5" />
-              </div>
-            </div>
-            <div>
-              <span className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{formatRupiah(totalAllocated)}</span>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex-grow bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-violet-500 to-indigo-500 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min((totalAllocated / Math.max(salary, 1)) * 100, 100)}%` }}
-                  ></div>
-                </div>
-                <span className="text-xs font-bold text-violet-400 shrink-0">
-                  {Math.round((totalAllocated / Math.max(salary, 1)) * 100)}%
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Unallocated Balance */}
-          <div className={`glass-panel p-6 rounded-3xl relative overflow-hidden group border transition-all duration-300 ${unallocatedBalance > 0
-              ? 'border-emerald-500/20 hover:border-emerald-500/40 glow-emerald'
-              : unallocatedBalance === 0
-                ? 'border-slate-800/80 hover:border-slate-700/60'
-                : 'border-rose-500/30 hover:border-rose-500/50 glow-rose'
+        {/* 1. DYNAMIC SUMMARY DASHBOARD */}
+        <section className={`glass-card rounded-2xl p-5 mb-5 border ${safetyBorder} ${safetyGlow}`}>
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Dashboard Ringkasan</span>
+            <span className={`text-[9px] font-black border px-2 py-0.5 rounded-full uppercase tracking-wider ${
+              sisaSaldoUtama <= 100000 && totalPemasukan > 0 
+                ? 'text-rose-400 bg-rose-950/40 border-rose-900/40' 
+                : sisaSaldoUtama <= 500000 && totalPemasukan > 0
+                ? 'text-amber-400 bg-amber-950/40 border-amber-900/40'
+                : 'text-emerald-400 bg-emerald-950/40 border-emerald-900/40'
             }`}>
-            <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl opacity-10 transition-all group-hover:opacity-20 bg-white"></div>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Sisa Saldo (Unallocated)</span>
-              <div className={`p-2 rounded-xl ${unallocatedBalance > 0
-                  ? 'bg-emerald-500/10 text-emerald-400'
-                  : unallocatedBalance === 0
-                    ? 'bg-slate-800 text-slate-400'
-                    : 'bg-rose-500/10 text-rose-400'
-                }`}>
-                <Wallet className="h-5 w-5" />
-              </div>
+              {safetyLabel}
+            </span>
+          </div>
+
+          {/* Core balances */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="bg-slate-950/35 border border-slate-850/80 rounded-xl p-3.5">
+              <span className="text-[9px] text-slate-450 uppercase block mb-1 font-bold">Total Pemasukan</span>
+              <h3 className="text-base font-black text-white truncate">{formatRupiah(totalPemasukan)}</h3>
             </div>
-            <div>
-              <span className={`text-2xl md:text-3xl font-extrabold tracking-tight ${unallocatedBalance > 0
-                  ? 'text-emerald-400'
-                  : unallocatedBalance === 0
-                    ? 'text-slate-300'
-                    : 'text-rose-400'
-                }`}>
-                {formatRupiah(unallocatedBalance)}
-              </span>
-              <p className="text-slate-500 text-xs mt-2 flex items-center gap-1.5">
-                {unallocatedBalance > 0 ? (
-                  <>
-                    <TrendingUp className="h-4 w-4 text-emerald-400 shrink-0" />
-                    <span className="text-emerald-400/90 font-medium">Uang aman untuk dimasukkan ke pos baru</span>
-                  </>
-                ) : unallocatedBalance === 0 ? (
-                  <span>Semua pendapatan telah dialokasikan dengan pas</span>
-                ) : (
-                  <>
-                    <AlertTriangle className="h-4 w-4 text-rose-400 shrink-0" />
-                    <span className="text-rose-400/90 font-medium">Kurangi anggaran pos atau naikkan gaji</span>
-                  </>
-                )}
-              </p>
+            <div className="bg-slate-950/50 border border-emerald-900/20 rounded-xl p-3.5">
+              <span className="text-[9px] text-emerald-450 uppercase block mb-1 font-bold">Sisa Saldo Utama</span>
+              <h3 className={`text-base font-black truncate ${sisaSaldoUtama <= 100000 && totalPemasukan > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                {formatRupiah(sisaSaldoUtama)}
+              </h3>
             </div>
           </div>
+
+          {totalPemasukan > 0 && (
+            <p className="text-[10px] text-slate-450 leading-relaxed italic bg-slate-900/20 p-2.5 rounded-lg border border-slate-850/40 text-center">
+              "{safetyDesc}"
+            </p>
+          )}
         </section>
 
-        {/* Analytics & Breakdown Section (WOW Factor!) */}
-        <section className="glass-panel p-6 rounded-3xl border border-slate-800/80 mb-8" aria-label="Analisis Alokasi Tabungan">
-          <div className="flex items-center gap-2 mb-6">
-            <Percent className="h-5 w-5 text-indigo-400" />
-            <h2 className="text-lg md:text-xl font-bold text-white">Distribusi Alokasi Tabungan</h2>
-          </div>
+        {/* 2. DYNAMIC STACKED PROGRESS GRAPH & ALLOCATION RATIOS */}
+        <section className="glass-card rounded-2xl p-5 mb-5 border border-slate-800">
+          <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1.5">
+            <span className="p-0.5 bg-slate-850 rounded text-xs">📊</span>
+            <span>Grafik Distribusi Dana</span>
+          </h3>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-            {/* SVG Visual Graphic Donut Chart */}
-            <div className="flex flex-col items-center justify-center py-4 border-b lg:border-b-0 lg:border-r border-slate-800/80">
-              <div className="relative w-44 h-44 flex items-center justify-center">
-                {/* SVG circular bar representation */}
-                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="transparent"
-                    stroke="#1e293b"
-                    strokeWidth="10"
-                  />
-                  {/* Dynamic main percentage fill */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="transparent"
-                    stroke="url(#indigoEmeraldGrad)"
-                    strokeWidth="10"
-                    strokeDasharray={251.2}
-                    strokeDashoffset={251.2 - (251.2 * overallSavedPercent) / 100}
-                    strokeLinecap="round"
-                    className="transition-all duration-1000 ease-out"
-                  />
-                  <defs>
-                    <linearGradient id="indigoEmeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#6366f1" />
-                      <stop offset="50%" stopColor="#8b5cf6" />
-                      <stop offset="100%" stopColor="#10b981" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                {/* Inside circle text representation */}
-                <div className="absolute text-center">
-                  <span className="block text-3xl font-extrabold text-white tracking-tight">{overallSavedPercent}%</span>
-                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Pendanaan</span>
+          {totalPemasukan === 0 ? (
+            <div className="py-6 text-center text-slate-500 text-xs italic bg-slate-950/20 rounded-xl border border-slate-850/50">
+              Masukkan total pemasukan terlebih dahulu untuk mengaktifkan grafik kontribusi.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              
+              {/* Stacked Progress Bar */}
+              <div className="w-full bg-slate-950/80 h-5 rounded-full p-0.5 overflow-hidden flex border border-slate-850">
+                {/* Sisa Saldo Utama (Emerald) */}
+                {pctSisa > 0 && (
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-l-full transition-all duration-500"
+                    style={{ 
+                      width: `${pctSisa}%`,
+                      borderTopRightRadius: pctNabung === 0 && pctSemuaPos === 0 ? '9999px' : '0px',
+                      borderBottomRightRadius: pctNabung === 0 && pctSemuaPos === 0 ? '9999px' : '0px'
+                    }}
+                    title={`Sisa Saldo: ${Math.round(pctSisa)}%`}
+                  ></div>
+                )}
+                {/* Uang Ditabung (Indigo/Violet) */}
+                {pctNabung > 0 && (
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 transition-all duration-500"
+                    style={{ 
+                      width: `${pctNabung}%`,
+                      borderTopLeftRadius: pctSisa === 0 ? '9999px' : '0px',
+                      borderBottomLeftRadius: pctSisa === 0 ? '9999px' : '0px',
+                      borderTopRightRadius: pctSemuaPos === 0 ? '9999px' : '0px',
+                      borderBottomRightRadius: pctSemuaPos === 0 ? '9999px' : '0px'
+                    }}
+                    title={`Uang Ditabung: ${Math.round(pctNabung)}%`}
+                  ></div>
+                )}
+                {/* Gabungan Semua Pos Pengeluaran (Rose/Orange) */}
+                {pctSemuaPos > 0 && (
+                  <div
+                    className="h-full bg-gradient-to-r from-rose-500 to-rose-450 rounded-r-full transition-all duration-500"
+                    style={{ 
+                      width: `${pctSemuaPos}%`,
+                      borderTopLeftRadius: pctSisa === 0 && pctNabung === 0 ? '9999px' : '0px',
+                      borderBottomLeftRadius: pctSisa === 0 && pctNabung === 0 ? '9999px' : '0px'
+                    }}
+                    title={`Pengeluaran Pos: ${Math.round(pctSemuaPos)}%`}
+                  ></div>
+                )}
+              </div>
+
+              {/* Legenda Ringkasan Persentase Tiga Sektor */}
+              <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
+                <div className="p-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                  <span className="block font-black text-emerald-400">{Math.round(pctSisa)}%</span>
+                  <span className="text-[8px] text-slate-450 uppercase block font-semibold">Sisa Saldo</span>
+                </div>
+                <div className="p-1.5 rounded-lg bg-indigo-500/5 border border-indigo-500/10">
+                  <span className="block font-black text-indigo-400">{Math.round(pctNabung)}%</span>
+                  <span className="text-[8px] text-slate-450 uppercase block font-semibold">Uang Nabung</span>
+                </div>
+                <div className="p-1.5 rounded-lg bg-rose-500/5 border border-rose-500/10">
+                  <span className="block font-black text-rose-400">{Math.round(pctSemuaPos)}%</span>
+                  <span className="text-[8px] text-slate-450 uppercase block font-semibold">Total Pos</span>
                 </div>
               </div>
-              <p className="text-xs text-slate-400 text-center mt-4 max-w-[240px]">
-                Pendanaan terkumpul sebesar <strong className="text-indigo-400">{formatRupiah(totalAllocated)}</strong> dari total target <strong className="text-emerald-400">{formatRupiah(totalTarget)}</strong>
-              </p>
-            </div>
 
-            {/* Custom Interactive Color Striped Allocations */}
-            <div className="lg:col-span-2 flex flex-col justify-center gap-4">
-              <h3 className="text-sm font-bold text-slate-300 mb-1 flex items-center gap-2">
-                <Info className="h-4 w-4 text-indigo-400" />
-                <span>Proporsi Pos Tabungan Terhadap Saldo Teralokasi</span>
-              </h3>
-
-              {/* Stacked Percentage Bar */}
-              <div className="w-full h-7 bg-slate-900 rounded-2xl overflow-hidden flex border border-slate-800 p-0.5">
-                {buckets.length === 0 || totalAllocated === 0 ? (
-                  <div className="w-full h-full bg-slate-800 rounded-xl flex items-center justify-center text-xs text-slate-500 italic">
-                    Belum ada dana yang teralokasi ke pos
-                  </div>
-                ) : (
-                  buckets.map((b) => {
-                    const ratio = totalAllocated > 0 ? (b.saved / totalAllocated) * 100 : 0
-                    if (ratio <= 0) return null
-                    const scheme = COLOR_SCHEMES[b.color] || COLOR_SCHEMES.indigo
+              {/* GRID PERSENTASE DETAIL PER MASING-MASING POS KEBUTUHAN */}
+              <div className="pt-2.5 border-t border-slate-850 space-y-2">
+                <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-wider block">Kontribusi Pengeluaran Per Pos:</span>
+                <div className="grid grid-cols-2 gap-2 max-h-[140px] overflow-y-auto pr-1 custom-scrollbar">
+                  {posList.map((pos) => {
+                    const pctOfPemasukan = totalPemasukan > 0 ? Math.round((pos.totalSpent / totalPemasukan) * 105) / 1.05 : 0
+                    const scheme = COLOR_SCHEMES[pos.color] || COLOR_SCHEMES.rose
                     return (
-                      <div
-                        key={b.id}
-                        className={`${scheme.fill} h-full first:rounded-l-xl last:rounded-r-xl transition-all hover:scale-y-110 duration-300 relative group`}
-                        style={{ width: `${ratio}%` }}
-                        title={`${b.name}: ${formatRupiah(b.saved)} (${Math.round(ratio)}%)`}
-                      >
-                        {/* Hover Tooltip */}
-                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-950 text-white text-[10px] py-1 px-2.5 rounded-lg border border-slate-700 pointer-events-none opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap z-10">
-                          {b.name}: {Math.round(ratio)}%
+                      <div key={pos.id} className="flex items-center justify-between text-[10px] bg-slate-950/20 px-2 py-1.5 rounded-lg border border-slate-850/50">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="shrink-0">{pos.emoji}</span>
+                          <span className="truncate text-slate-300 font-semibold">{pos.name}</span>
                         </div>
+                        <span className={`shrink-0 font-bold ${scheme.text}`}>{pctOfPemasukan.toFixed(1)}%</span>
                       </div>
                     )
-                  })
-                )}
+                  })}
+                </div>
               </div>
 
-              {/* Legend Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
-                {buckets.map((b) => {
-                  const ratio = totalAllocated > 0 ? (b.saved / totalAllocated) * 100 : 0
-                  const scheme = COLOR_SCHEMES[b.color] || COLOR_SCHEMES.indigo
-                  return (
-                    <div key={b.id} className="flex items-center gap-2 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/40">
-                      <div className={`w-3 h-3 rounded-full ${scheme.fill}`}></div>
-                      <div className="min-w-0 flex-grow">
-                        <p className="text-xs font-semibold text-white truncate">{b.name}</p>
-                        <p className="text-[10px] text-slate-400 font-bold">{Math.round(ratio)}% dari dana</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
             </div>
-          </div>
+          )}
         </section>
 
-        {/* Savings Buckets Cards Grid */}
-        <section className="mb-8" aria-label="Pos Tabungan Saya">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-6 w-6 text-indigo-400" />
-              <h2 className="text-xl md:text-2xl font-black text-white">Daftar Pos Tabungan (Savings Buckets)</h2>
+        {/* 3. FORM INPUT PEMASUKAN UTAMA */}
+        <section className="glass-card rounded-2xl p-5 mb-5 border border-slate-800">
+          <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1.5">
+            <span className="p-0.5 bg-slate-850 rounded text-xs">💰</span>
+            <span>Pemasukan Utama</span>
+          </h3>
+
+          <form onSubmit={handleAddPemasukan} className="space-y-3.5">
+            <div>
+              <label htmlFor="pemasukan-input" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Nominal Pendapatan (Rupiah)</label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-slate-500">Rp</span>
+                <input
+                  id="pemasukan-input"
+                  type="text"
+                  value={inputPemasukan}
+                  onChange={(e) => setInputPemasukan(formatRibuanString(e.target.value))}
+                  placeholder="Contoh: 1.500.000"
+                  className="w-full bg-slate-950/60 border border-slate-800/80 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-650 focus:outline-none focus:border-emerald-500 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleResetPemasukan}
+                className="w-full py-2.5 rounded-xl border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold text-center cursor-pointer transition-colors"
+              >
+                Reset ke 0
+              </button>
+              <button
+                type="submit"
+                className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black uppercase tracking-widest py-2.5 rounded-xl transition-all shadow-md shadow-emerald-500/10 cursor-pointer flex items-center justify-center gap-1"
+              >
+                <IconPlus className="h-3.5 w-3.5 stroke-[3] text-slate-950" />
+                <span>Tambah Uang</span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        {/* 4. POS TABUNGAN (INTERAKTIF CELENGAN) */}
+        <section className="glass-card rounded-2xl p-5 mb-5 border border-slate-800">
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest block mb-0.5">Pos Tabungan</span>
+              <h3 className="text-xl font-black text-white">{formatRupiah(totalNabung)}</h3>
+              <span className="text-[9px] text-slate-450 block mt-0.5">Anggaran Khusus untuk Celengan Masa Depan</span>
+            </div>
+            <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/20 shrink-0">
+              <IconPiggy className="h-6 w-6" />
+            </div>
+          </div>
+
+          {/* Form Nabung */}
+          <form onSubmit={handleAddNabung} className="space-y-3 p-3 bg-slate-950/25 border border-slate-850 rounded-xl mb-4">
+            <span className="text-[9px] font-black text-indigo-350 uppercase tracking-wider block">Tambah Celengan</span>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label htmlFor="nabung-amount" className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Jumlah (Rp)</label>
+                <input
+                  id="nabung-amount"
+                  type="text"
+                  value={inputNabungAmount}
+                  onChange={(e) => setInputNabungAmount(formatRibuanString(e.target.value))}
+                  placeholder="Contoh: 100.000"
+                  className="w-full bg-slate-950/60 border border-slate-800/80 rounded-lg py-1.5 px-2.5 text-xs text-white placeholder-slate-650 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="nabung-note" className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Catatan</label>
+                <input
+                  id="nabung-note"
+                  type="text"
+                  value={inputNabungNote}
+                  onChange={(e) => setInputNabungNote(e.target.value)}
+                  placeholder="Beli emas / reksa dana"
+                  className="w-full bg-slate-950/60 border border-slate-800/80 rounded-lg py-1.5 px-2.5 text-xs text-white placeholder-slate-650 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
             </div>
 
             <button
-              onClick={() => setIsAddingBucket(!isAddingBucket)}
-              className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs md:text-sm font-bold rounded-xl shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-2 self-start cursor-pointer"
+              type="submit"
+              className="w-full bg-indigo-650 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-lg transition-all cursor-pointer"
             >
-              {isAddingBucket ? <X className="h-4.5 w-4.5" /> : <PlusCircle className="h-4.5 w-4.5" />}
-              <span>{isAddingBucket ? 'Batal Tambah' : 'Tambah Pos Tabungan'}</span>
+              Masukkan Celengan
+            </button>
+          </form>
+
+          {/* Riwayat Tabungan */}
+          <div className="space-y-2">
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Alokasi Terakhir</span>
+            {nabungHistory.length === 0 ? (
+              <div className="py-4 text-center text-slate-550 text-[11px] italic bg-slate-950/15 rounded-lg border border-slate-850/40">
+                Belum ada celengan tabungan yang ditambahkan.
+              </div>
+            ) : (
+              <div className="max-h-[140px] overflow-y-auto pr-1 space-y-2 custom-scrollbar">
+                {nabungHistory.map((tx) => (
+                  <div key={tx.id} className="group p-2.5 bg-slate-950/30 border border-slate-850 rounded-lg flex items-center justify-between gap-3 hover:border-slate-800 transition-all">
+                    <div className="min-w-0">
+                      <h5 className="text-[11px] font-bold text-slate-200 truncate">{tx.note}</h5>
+                      <span className="text-[8px] text-slate-500 block mt-0.5">{tx.timestamp}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-black text-indigo-400">+{formatRupiah(tx.amount)}</span>
+                      <button
+                        onClick={() => handleDeleteNabung(tx)}
+                        className="p-1 text-slate-500 hover:text-rose-500 hover:bg-rose-500/10 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        title="Hapus Alokasi"
+                      >
+                        <IconTrash className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 5. MULTIPLE DYNAMIC POS PENGELUARAN CARDS (Rose, Amber, Emerald, Sky, Violet, etc.) */}
+        <section className="space-y-5">
+          <div className="flex justify-between items-center px-1">
+            <h3 className="text-[10px] font-extrabold text-slate-450 uppercase tracking-widest">
+              Daftar Pos Kebutuhan ({posList.length})
+            </h3>
+            <button
+              onClick={() => setShowCustomPosForm(prev => !prev)}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700/50 text-[10px] font-bold text-emerald-400 flex items-center gap-1 transition-all cursor-pointer"
+            >
+              <span>{showCustomPosForm ? 'Batal ❌' : '➕ Tambah Pos Baru'}</span>
             </button>
           </div>
 
-          {/* Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* INLINE ADD BUCKET FORM CARD */}
-            {isAddingBucket && (
-              <div className="glass-panel p-6 rounded-3xl border border-indigo-500/30 glow-indigo animate-pulse-once">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400">
-                    <PlusCircle className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-bold text-white text-base">Buat Pos Baru</h3>
-                </div>
-
-                <form onSubmit={createBucket} className="flex flex-col gap-4">
-                  <div>
-                    <label htmlFor="newBucketName" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Nama Pos</label>
-                    <input
-                      id="newBucketName"
-                      type="text"
-                      placeholder="Contoh: Tabungan Liburan, Bayar Pajak"
-                      value={newBucketName}
-                      onChange={(e) => setNewBucketName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl glass-input text-sm"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="newBucketTarget" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Target Uang (Rp)</label>
-                    <input
-                      id="newBucketTarget"
-                      type="number"
-                      placeholder="Contoh: 2000000"
-                      value={newBucketTarget}
-                      onChange={(e) => setNewBucketTarget(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl glass-input text-sm"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="newBucketIcon" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Ikon</label>
-                      <select
-                        id="newBucketIcon"
-                        value={newBucketIcon}
-                        onChange={(e) => setNewBucketIcon(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl glass-input text-sm"
-                      >
-                        <option value="savings">💰 Celengan</option>
-                        <option value="home">🏠 Kosan / Rumah</option>
-                        <option value="education">🎓 Kuliah / Sekolah</option>
-                        <option value="transport">🚗 Bensin / Transport</option>
-                        <option value="food">🍔 Makan Bulanan</option>
-                        <option value="other">💵 Finansial Lainnya</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="newBucketColor" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Warna Kartu</label>
-                      <select
-                        id="newBucketColor"
-                        value={newBucketColor}
-                        onChange={(e) => setNewBucketColor(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl glass-input text-sm"
-                      >
-                        <option value="indigo">Indigo Blue</option>
-                        <option value="violet">Deep Purple</option>
-                        <option value="emerald">Emerald Green</option>
-                        <option value="amber">Warm Orange</option>
-                        <option value="rose">Rose Red</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-2.5 mt-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition-all shadow-md cursor-pointer"
-                  >
-                    Buat Pos Tabungan
-                  </button>
-                </form>
+          {/* DYNAMIC FORM TAMBAH POS KUSTOM BARU */}
+          {showCustomPosForm && (
+            <form onSubmit={handleCreateCustomPos} className="glass-card rounded-2xl p-5 border border-slate-800 animate-fadein space-y-4">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">➕ Buat Pos Kebutuhan Baru</span>
+              
+              <div>
+                <label htmlFor="custom-pos-name" className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">Nama Pos Kustom</label>
+                <input
+                  id="custom-pos-name"
+                  type="text"
+                  value={newPosName}
+                  onChange={(e) => setNewPosName(e.target.value)}
+                  placeholder="Contoh: Pos Nonton Bioskop / Kopi"
+                  className="w-full bg-slate-950/60 border border-slate-800/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
+                />
               </div>
-            )}
 
-            {/* list of buckets */}
-            {buckets.map((b) => {
-              const scheme = COLOR_SCHEMES[b.color] || COLOR_SCHEMES.indigo
-              const BucketIcon = ICON_MAP[b.icon] || PiggyBank
-              const progressPercent = b.target > 0 ? Math.min(Math.round((b.saved / b.target) * 100), 100) : 0
-              const isTargetMet = b.saved >= b.target
-
-              // Check if bucket is in Editing state
-              if (editingBucketId === b.id) {
-                return (
-                  <div key={b.id} className="glass-panel p-6 rounded-3xl border border-indigo-500/30 glow-indigo">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-bold text-white text-base">Edit Pos Tabungan</h3>
-                      <button onClick={() => setEditingBucketId(null)} className="text-slate-400 hover:text-white">
-                        <X className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    <form onSubmit={updateBucket} className="flex flex-col gap-3">
-                      <div>
-                        <label htmlFor={`editName-${b.id}`} className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Nama Pos</label>
-                        <input
-                          id={`editName-${b.id}`}
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className="w-full px-3 py-1.5 rounded-xl glass-input text-xs"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`editTarget-${b.id}`} className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Target Baru (Rp)</label>
-                        <input
-                          id={`editTarget-${b.id}`}
-                          type="number"
-                          value={editTarget}
-                          onChange={(e) => setEditTarget(e.target.value)}
-                          className="w-full px-3 py-1.5 rounded-xl glass-input text-xs"
-                          required
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label htmlFor={`editIcon-${b.id}`} className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Ikon</label>
-                          <select
-                            id={`editIcon-${b.id}`}
-                            value={editIcon}
-                            onChange={(e) => setEditIcon(e.target.value)}
-                            className="w-full px-2 py-1.5 rounded-xl glass-input text-xs"
-                          >
-                            <option value="savings">💰 Celengan</option>
-                            <option value="home">🏠 Kosan</option>
-                            <option value="education">🎓 Kuliah</option>
-                            <option value="transport">🚗 Transport</option>
-                            <option value="food">🍔 Makan</option>
-                            <option value="other">💵 Lainnya</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label htmlFor={`editColor-${b.id}`} className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Warna</label>
-                          <select
-                            id={`editColor-${b.id}`}
-                            value={editColor}
-                            onChange={(e) => setEditColor(e.target.value)}
-                            className="w-full px-2 py-1.5 rounded-xl glass-input text-xs"
-                          >
-                            <option value="indigo">Indigo Blue</option>
-                            <option value="violet">Deep Purple</option>
-                            <option value="emerald">Emerald Green</option>
-                            <option value="amber">Orange</option>
-                            <option value="rose">Rose Red</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2 mt-3">
-                        <button
-                          type="submit"
-                          className="flex-grow py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-all cursor-pointer"
-                        >
-                          Simpan Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingBucketId(null)}
-                          className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 text-xs cursor-pointer"
-                        >
-                          Batal
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )
-              }
-
-              // Normal Bucket Card
-              return (
-                <div
-                  key={b.id}
-                  className={`glass-card p-6 rounded-3xl border ${scheme.border} flex flex-col justify-between relative group ${isTargetMet ? 'shadow-lg hover:shadow-emerald-500/5' : ''
-                    }`}
-                >
-                  {/* Target Met Sparkle Effect */}
-                  {isTargetMet && (
-                    <div className="absolute -top-2.5 -right-2.5 bg-emerald-500 text-slate-950 font-black text-[9px] uppercase tracking-wider px-2 py-1 rounded-lg border border-emerald-400 shadow-lg shadow-emerald-500/20 flex items-center gap-1 z-10 select-none">
-                      <Sparkles className="h-3 w-3" />
-                      <span>Target Terpenuhi</span>
-                    </div>
-                  )}
-
-                  {/* Bucket Header */}
-                  <div>
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl ${scheme.bg} ${scheme.text} transition-all`}>
-                          <BucketIcon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <h3 className="font-extrabold text-white text-base md:text-lg tracking-tight group-hover:text-indigo-200 transition-colors">
-                            {b.name}
-                          </h3>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${scheme.badge}`}>
-                            {b.icon === 'home'
-                              ? 'Kebutuhan Rumah'
-                              : b.icon === 'education'
-                                ? 'Pendidikan'
-                                : b.icon === 'transport'
-                                  ? 'Bensin & Jalan'
-                                  : b.icon === 'food'
-                                    ? 'Konsumsi'
-                                    : 'Tabungan Mandiri'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Config buttons */}
-                      <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => startEditingBucket(b)}
-                          className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer"
-                          title="Edit Pos"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => deleteBucket(b.id, b.name, b.saved)}
-                          className="p-1.5 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 rounded-lg transition-colors cursor-pointer"
-                          title="Hapus Pos"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Progress details */}
-                    <div className="mb-4">
-                      <div className="flex justify-between items-baseline mb-2">
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kondisi Tabungan</span>
-                        <div className="text-right">
-                          <span className="text-sm font-bold text-white block">{formatRupiah(b.saved)}</span>
-                          <span className="text-[10px] text-slate-500 font-medium">Target: {formatRupiah(b.target)}</span>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar Container */}
-                      <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800 p-0.5 relative">
-                        <div
-                          className={`h-full rounded-full transition-all duration-700 ease-out ${isTargetMet ? 'bg-gradient-to-r from-emerald-500 to-indigo-500' : scheme.fill
-                            }`}
-                          style={{ width: `${progressPercent}%` }}
-                        ></div>
-                      </div>
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-[10px] text-slate-500 font-bold uppercase">Progres Alokasi</span>
-                        <span className={`text-xs font-black ${isTargetMet ? 'text-emerald-400' : scheme.text}`}>
-                          {progressPercent}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Deposit / Spend Action Block */}
-                  <div className="mt-4 pt-4 border-t border-slate-800/80">
-                    {/* Toggle Selector */}
-                    <div className="grid grid-cols-2 bg-slate-950/80 p-1 rounded-xl border border-slate-800/50 mb-3 text-[10px] font-bold">
-                      <button
-                        onClick={() => setCardActionTypes({ ...cardActionTypes, [b.id]: 'deposit' })}
-                        className={`py-1.5 rounded-lg text-center transition-all cursor-pointer ${(cardActionTypes[b.id] || 'deposit') === 'deposit'
-                            ? 'bg-indigo-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:text-white'
-                          }`}
-                      >
-                        💵 Isi Pos (Simpan)
-                      </button>
-                      <button
-                        onClick={() => setCardActionTypes({ ...cardActionTypes, [b.id]: 'withdraw' })}
-                        className={`py-1.5 rounded-lg text-center transition-all cursor-pointer ${cardActionTypes[b.id] === 'withdraw'
-                            ? 'bg-rose-950 text-rose-300 border border-rose-500/25 shadow-sm'
-                            : 'text-slate-400 hover:text-white'
-                          }`}
-                      >
-                        🛍️ Pakai Pos (Belanja)
-                      </button>
-                    </div>
-
-                    {/* Quick Preset Amounts Buttons */}
-                    <div className="grid grid-cols-3 gap-1.5 mb-3">
-                      {[(cardActionTypes[b.id] || 'deposit') === 'deposit' ? 100000 : 50000, 200000, 500000].map((preset) => {
-                        const action = cardActionTypes[b.id] || 'deposit'
-                        return (
-                          <button
-                            key={preset}
-                            onClick={() => setQuickAmount(b.id, preset, action)}
-                            className="py-1 text-[10px] font-bold text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-850 border border-slate-850 hover:border-slate-750 rounded-lg transition-colors cursor-pointer"
-                          >
-                            {action === 'deposit' ? '+' : '-'} {preset / 1000}k
-                          </button>
-                        )
-                      })}
-                    </div>
-
-                    {/* Transaction Form Inputs */}
-                    <div className="flex gap-2">
-                      <div className="relative flex-grow">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] font-bold">Rp</span>
-                        <input
-                          type="number"
-                          placeholder="Nominal"
-                          value={cardAmounts[b.id] || ''}
-                          onChange={(e) => setCardAmounts({ ...cardAmounts, [b.id]: e.target.value })}
-                          className="w-full pl-7 pr-2 py-1.5 rounded-xl glass-input text-xs"
-                        />
-                      </div>
-                      <button
-                        onClick={() => processCardTransaction(b.id)}
-                        className={`px-3 py-1.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer ${(cardActionTypes[b.id] || 'deposit') === 'deposit'
-                            ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/10'
-                            : 'bg-rose-700 hover:bg-rose-600 text-white shadow-rose-700/10'
-                          }`}
-                      >
-                        {(cardActionTypes[b.id] || 'deposit') === 'deposit' ? 'Simpan' : 'Pakai'}
-                      </button>
-                    </div>
-                  </div>
+              {/* Emoji Selector */}
+              <div>
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-2">Pilih Emoji Representatif</span>
+                <div className="flex flex-wrap gap-2">
+                  {emojiOptions.map(em => (
+                    <button
+                      key={em}
+                      type="button"
+                      onClick={() => setNewPosEmoji(em)}
+                      className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-all border ${
+                        newPosEmoji === em 
+                          ? 'bg-emerald-500/10 border-emerald-500 text-white shadow-md shadow-emerald-950/20' 
+                          : 'bg-slate-950/40 border-slate-850 hover:border-slate-750 text-slate-400'
+                      }`}
+                    >
+                      {em}
+                    </button>
+                  ))}
                 </div>
+              </div>
+
+              {/* Accent Color Selector */}
+              <div>
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-2">Pilih Aksen Warna Kartu</span>
+                <div className="flex gap-3">
+                  {colorOptions.map(col => {
+                    const theme = COLOR_SCHEMES[col]
+                    return (
+                      <button
+                        key={col}
+                        type="button"
+                        onClick={() => setNewPosColor(col)}
+                        className={`w-6 h-6 rounded-full ${theme.bar} transition-all border-2 ${
+                          newPosColor === col ? 'border-white scale-110 shadow-lg shadow-slate-950/30' : 'border-transparent scale-100 opacity-60'
+                        }`}
+                        title={col}
+                      ></button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black uppercase tracking-widest py-2.5 rounded-xl transition-all shadow-md shadow-emerald-500/10 cursor-pointer"
+              >
+                Buat Kartu Pos
+              </button>
+            </form>
+          )}
+
+          {/* RENDER KARTU POS SECARA DINAMIS (Makan, Belanja, Keluarga, Transport, dll) */}
+          <div className="space-y-4">
+            {posList.map((pos) => {
+              const isCustom = pos.id.startsWith('pos-custom-')
+              return (
+                <PosCard
+                  key={pos.id}
+                  pos={pos}
+                  isCustom={pos.id.startsWith('pos-custom-')}
+                  onAddTransaction={handleAddPosTransaction}
+                  onDeleteTransaction={handleDeletePosTransaction}
+                  onDeletePos={handleDeleteCustomPos}
+                  sisaSaldo={sisaSaldoUtama}
+                  formatRupiah={formatRupiah}
+                />
               )
             })}
-
-            {/* Empty State Buckets */}
-            {buckets.length === 0 && !isAddingBucket && (
-              <div className="col-span-full py-12 px-6 rounded-3xl border border-dashed border-slate-800 text-center flex flex-col items-center justify-center">
-                <div className="h-16 w-16 bg-slate-900/60 text-slate-500 rounded-full flex items-center justify-center border border-slate-800 mb-4">
-                  <Wallet className="h-8 w-8" />
-                </div>
-                <h4 className="font-extrabold text-white text-base">Belum Ada Pos Tabungan</h4>
-                <p className="text-slate-500 text-xs mt-2 max-w-[280px] leading-relaxed">
-                  Silakan buat pos tabungan/anggaran spesifik pertama Anda untuk memulai mengalokasikan gaji masuk.
-                </p>
-                <button
-                  onClick={() => setIsAddingBucket(true)}
-                  className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer"
-                >
-                  Buat Pos Sekarang
-                </button>
-              </div>
-            )}
           </div>
         </section>
 
-        {/* Transaction History Section */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start" aria-label="Riwayat & Bantuan Finansial">
-          {/* Left panel: Activity Log (2 Cols) */}
-          <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-slate-800/80">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-800/60 pb-5 mb-5 gap-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-indigo-400" />
-                <h2 className="text-lg md:text-xl font-bold text-white">Riwayat Transaksi Terkini</h2>
-              </div>
+      </div>
+    </div>
+  )
+}
 
-              {/* Transaction Filters */}
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <input
-                  type="text"
-                  placeholder="Cari transaksi..."
-                  value={txSearch}
-                  onChange={(e) => setTxSearch(e.target.value)}
-                  className="px-2.5 py-1.5 rounded-lg glass-input text-xs w-full sm:w-36 md:w-44"
-                />
+// --- Helper: Dapatkan Placeholder Catatan Pengeluaran Dinamis Berdasarkan Kategori Pos ---
+const getNotePlaceholder = (pos) => {
+  const nameLower = pos.name.toLowerCase()
+  if (pos.id === 'pos-makan' || nameLower.includes('makan') || nameLower.includes('minum')) {
+    return 'Contoh: Makan siang / Kopi'
+  }
+  if (pos.id === 'pos-belanja' || nameLower.includes('belanja') || nameLower.includes('pribadi')) {
+    return 'Contoh: Checkout baju / Sepatu'
+  }
+  if (pos.id === 'pos-tagihan' || nameLower.includes('tagihan') || nameLower.includes('cicilan') || nameLower.includes('listrik') || nameLower.includes('internet')) {
+    return 'Contoh: Bayar listrik / Kuota internet'
+  }
+  if (pos.id === 'pos-kendaraan' || nameLower.includes('kendaraan') || nameLower.includes('transport') || nameLower.includes('bensin') || nameLower.includes('ojek')) {
+    return 'Contoh: Bensin motor / Servis'
+  }
+  if (pos.id === 'pos-keluarga' || nameLower.includes('keluarga') || nameLower.includes('mama') || nameLower.includes('ortu')) {
+    return 'Contoh: Kirim ke Mama / Belanja bulanan'
+  }
+  if (nameLower.includes('kampus') || nameLower.includes('kuliah') || nameLower.includes('tugas') || nameLower.includes('sekolah') || nameLower.includes('kas')) {
+    return 'Contoh: Uang kas / Fotokopi tugas'
+  }
+  return 'Contoh: Tulis rincian pengeluaran...'
+}
 
-                <select
-                  value={txFilter}
-                  onChange={(e) => setTxFilter(e.target.value)}
-                  className="px-2 py-1.5 rounded-lg glass-input text-xs text-slate-350"
-                >
-                  <option value="all">Semua Tipe</option>
-                  <option value="deposit">📥 Tabung (+)</option>
-                  <option value="withdraw">🛍️ Belanja (-)</option>
-                  <option value="system">⚙️ Sistem</option>
-                </select>
-              </div>
-            </div>
+// --- SUB-KOMPONEN MODULAR: PosCard (Isolasi State Form & Render Riwayat) ---
+function PosCard({ pos, isCustom, onAddTransaction, onDeleteTransaction, onDeletePos, sisaSaldo, formatRupiah }) {
+  const [amount, setAmount] = useState('')
+  const [note, setNote] = useState('')
 
-            {/* Scrollable Transaction Log */}
-            <div className="max-h-[360px] overflow-y-auto pr-1 flex flex-col gap-3">
-              {filteredTransactions.map((tx) => {
-                const isDeposit = tx.type === 'deposit'
-                const isWithdraw = tx.type === 'withdraw'
+  const theme = COLOR_SCHEMES[pos.color] || COLOR_SCHEMES.rose
 
-                return (
-                  <div
-                    key={tx.id}
-                    className="p-3.5 rounded-2xl bg-slate-900/30 border border-slate-850 hover:border-slate-800 transition-colors flex items-center justify-between gap-4"
-                  >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div className={`p-2 rounded-xl shrink-0 ${isDeposit
-                          ? 'bg-emerald-500/10 text-emerald-400'
-                          : isWithdraw
-                            ? 'bg-rose-500/10 text-rose-400'
-                            : 'bg-indigo-500/10 text-indigo-400'
-                        }`}>
-                        {isDeposit ? (
-                          <ArrowUpRight className="h-5 w-5" />
-                        ) : isWithdraw ? (
-                          <ArrowDownLeft className="h-5 w-5" />
-                        ) : (
-                          <Check className="h-5 w-5" />
-                        )}
-                      </div>
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const parsedAmount = parseFormattedToNumber(amount)
+    const parsedNote = note.trim() || `Pengeluaran ${pos.name}`
 
-                      <div className="min-w-0">
-                        <p className="text-xs md:text-sm font-semibold text-slate-100 leading-tight">
-                          {tx.description}
-                        </p>
-                        <p className="text-[10px] text-slate-500 font-bold mt-1.5 flex items-center gap-2">
-                          <span>{tx.timestamp}</span>
-                          {tx.bucketName && (
-                            <>
-                              <span>&bull;</span>
-                              <span className="text-indigo-400 uppercase tracking-wider">{tx.bucketName}</span>
-                            </>
-                          )}
-                        </p>
-                      </div>
-                    </div>
+    // Trigger callback ke parent
+    onAddTransaction(pos.id, parsedAmount, parsedNote)
+    
+    // Reset Form Local
+    setAmount('')
+    setNote('')
+  }
 
-                    <div className="text-right shrink-0">
-                      {tx.amount > 0 ? (
-                        <span className={`text-xs md:text-sm font-extrabold tracking-tight ${isDeposit ? 'text-emerald-400' : 'text-rose-400'
-                          }`}>
-                          {isDeposit ? '+' : '-'} {formatRupiah(tx.amount)}
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-widest">Sistem</span>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-
-              {filteredTransactions.length === 0 && (
-                <div className="py-12 text-center text-slate-500 text-xs italic">
-                  Tidak ditemukan riwayat transaksi yang cocok.
-                </div>
-              )}
-            </div>
+  return (
+    <div className={`glass-card rounded-2xl p-5 ${theme.glow} ${theme.border}`}>
+      
+      {/* Header Kartu Pos */}
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-11 h-11 rounded-xl ${theme.bg} ${theme.text} border ${theme.border} flex items-center justify-center text-xl shrink-0`}>
+            {pos.emoji}
           </div>
-
-          {/* Right panel: Financial Helper Tip (1 Col) */}
-          <div className="glass-panel p-6 rounded-3xl border border-slate-800/80 flex flex-col justify-between self-stretch">
-            <div>
-              <div className="flex items-center gap-2 border-b border-slate-800/60 pb-4 mb-4">
-                <HelpCircle className="h-5 w-5 text-indigo-400" />
-                <h2 className="text-lg font-bold text-white">Panduan Alokasi Pintar</h2>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                Metode penganggaran personal yang paling populer dan disarankan adalah aturan finansial **50/30/20**:
-              </p>
-
-              <ul className="flex flex-col gap-3 text-xs text-slate-300">
-                <li className="flex items-start gap-2.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 shrink-0"></div>
-                  <div>
-                    <strong className="text-white block">50% Kebutuhan Pokok (Needs)</strong>
-                    <span className="text-slate-450">Bayar kosan/kontrakan, makan pokok bulanan, bensin, tagihan air & listrik.</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-violet-500 mt-1.5 shrink-0"></div>
-                  <div>
-                    <strong className="text-white block">30% Keinginan Pribadi (Wants)</strong>
-                    <span className="text-slate-450">Belanja pakaian baru, langganan streaming film, makan di kafe, dan hobi.</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></div>
-                  <div>
-                    <strong className="text-white block">20% Investasi & Tabungan (Savings)</strong>
-                    <span className="text-slate-450">Mengisi dana darurat, menabung investasi reksadana/emas, kuliah lanjut.</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            <div className="mt-6 pt-5 border-t border-slate-800/60 text-center">
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-2">Target Budgeting Anda Saat Ini</span>
-              <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-indigo-950/40 text-indigo-300 border border-indigo-500/20 rounded-2xl text-xs font-bold">
-                <span>Tabungan Aktif: {buckets.length} Pos</span>
-                <span>&bull;</span>
-                <span>Total Target: {formatRupiah(totalTarget)}</span>
-              </div>
-            </div>
+          <div>
+            <h4 className="font-extrabold text-white text-xs tracking-wide uppercase leading-none">{pos.name}</h4>
+            <h3 className={`text-base font-black mt-1 ${theme.text}`}>{formatRupiah(pos.totalSpent)}</h3>
+            <span className="text-[8px] text-slate-450 block mt-0.5">Sudah Terpakai</span>
           </div>
-        </section>
+        </div>
+
+        {/* Hapus Tombol khusus Pos Kustom buatan user */}
+        {isCustom && (
+          <button
+            onClick={() => onDeletePos(pos.id, pos.name, pos.totalSpent)}
+            className="p-1 rounded text-slate-500 hover:text-rose-500 transition-colors focus:outline-none shrink-0 cursor-pointer"
+            title="Hapus Pos Kebutuhan"
+          >
+            <IconX className="h-4.5 w-4.5" />
+          </button>
+        )}
       </div>
 
-      {/* Footer copyright */}
-      <footer className="text-center text-slate-600 text-xs mt-16 pt-6 border-t border-slate-900">
-        <p>&copy; 2026 Pos Keuangan Mandiri App. Dibuat Wahyu.</p>
-      </footer>
+      {/* Form Tambah Pengeluaran Unik Kartu Pos */}
+      <form onSubmit={handleSubmit} className="space-y-2.5 p-3 bg-slate-950/20 border border-slate-850 rounded-xl mb-4">
+        <span className={`text-[8.5px] font-black uppercase tracking-wider block ${theme.text}`}>Catat Transaksi Baru</span>
+        
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label htmlFor={`amount-${pos.id}`} className="text-[8px] font-bold text-slate-400 uppercase block mb-1">Nominal (Rp)</label>
+            <input
+              id={`amount-${pos.id}`}
+              type="text"
+              value={amount}
+              onChange={(e) => setAmount(formatRibuanString(e.target.value))}
+              placeholder="Contoh: 15.000"
+              className={`w-full bg-slate-950/60 border border-slate-800/85 rounded-lg py-1.5 px-2.5 text-xs text-white placeholder-slate-650 focus:outline-none ${theme.focusBorder}`}
+            />
+          </div>
+          <div>
+            <label htmlFor={`note-${pos.id}`} className="text-[8px] font-bold text-slate-400 uppercase block mb-1">Catatan</label>
+            <input
+              id={`note-${pos.id}`}
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={getNotePlaceholder(pos)}
+              className={`w-full bg-slate-950/60 border border-slate-800/85 rounded-lg py-1.5 px-2.5 text-xs text-white placeholder-slate-650 focus:outline-none ${theme.focusBorder}`}
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          className={`w-full text-[9px] font-black uppercase tracking-widest py-2 rounded-lg transition-all cursor-pointer ${theme.btnBg}`}
+        >
+          Kurangi Saldo & Catat
+        </button>
+      </form>
+
+      {/* Riwayat Log Pengeluaran Unik Kartu Pos */}
+      <div className="space-y-2">
+        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Riwayat Transaksi</span>
+        {(pos.history || []).length === 0 ? (
+          <div className="py-3 text-center text-slate-550 text-[10px] italic bg-slate-950/15 rounded-lg border border-slate-850/40">
+            Belum ada catatan pengeluaran di pos ini.
+          </div>
+        ) : (
+          <div className="max-h-[120px] overflow-y-auto pr-1 space-y-2 custom-scrollbar">
+            {(pos.history || []).map((tx) => (
+              <div key={tx.id} className="group p-2.5 bg-slate-950/30 border border-slate-850 rounded-lg flex items-center justify-between gap-3 hover:border-slate-800 transition-all">
+                <div className="min-w-0">
+                  <h5 className="text-[10px] font-bold text-slate-200 truncate">{tx.note}</h5>
+                  <span className="text-[7.5px] text-slate-500 block mt-0.5">{tx.timestamp}</span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[11px] font-black text-rose-400">-{formatRupiah(tx.amount)}</span>
+                  <button
+                    onClick={() => onDeleteTransaction(pos.id, tx)}
+                    className="p-1 text-slate-550 hover:text-rose-500 hover:bg-rose-500/10 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                    title="Hapus Transaksi"
+                  >
+                    <IconTrash className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
     </div>
   )
 }
